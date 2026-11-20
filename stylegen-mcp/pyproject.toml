@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stylegen-mcp"
+version = "0.1.0"
+description = "Deterministic 2D 'What if' style video engine, driven by episode JSON, exposed as an MCP server"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "mcp>=1.2",
+  "pycairo>=1.25",
+]
+
+[project.scripts]
+stylegen-mcp = "stylegen.server:main"
+stylegen-render = "stylegen.render:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+stylegen = ["guide.md", "fonts/*", "examples/*.json"]

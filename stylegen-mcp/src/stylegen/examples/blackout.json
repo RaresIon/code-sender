@@ -1,0 +1,137 @@
+{
+  "meta": {"title": "What if the power went out for good?", "fps": 30, "series_tag": "WHAT IF",
+           "dark_tint": "#2b3554"},
+
+  "cast": {
+    "mum":       {"skin": "#e3a98a", "hair": "bob", "hair_color": "#6b3b24",
+                  "top": "tshirt", "top_color": "#8a4a5a", "legs_color": "#2f3442"},
+    "kid":       {"skin": "#c98e66", "hair": "short", "hair_color": "#2b1d16",
+                  "top": "hoodie", "top_color": "#3f6a8f", "scale": 0.82},
+    "neighbour": {"skin": "#8d5a3c", "hair": "bald", "top": "jacket", "top_color": "#5b5e3a",
+                  "shirt_color": "#d9d4c8", "tie": "#7a2a2a", "glasses": true,
+                  "scale": 1.05, "build": 1.1}
+  },
+
+  "sets": {
+    "kitchen": {"elements": [
+      {"kit": "backdrop", "color": "#d6c2a4", "floor_y": 1300},
+      {"kit": "floor", "y": 1300, "color": "#8a6c52"},
+      {"kit": "fridge", "x": -150, "y": 560, "w": 260, "h": 740},
+      {"kit": "cabinets", "x": 140, "y": 360, "w": 400, "h": 250, "color": "#6f8f8a"},
+      {"kit": "window", "id": "win", "x": 640, "y": 330, "w": 340, "h": 360, "sky": "dusk", "moon": true},
+      {"kit": "wall_clock", "id": "clock", "x": 340, "y": 270, "time": "19:42"},
+      {"kit": "counter", "x": 120, "y": 1000, "w": 460, "h": 300, "stove": true},
+      {"kit": "pendant_lamp", "x": 830, "y": 860},
+      {"kit": "table", "x": 610, "y": 1240, "w": 450, "h": 330, "front": true}
+    ]},
+    "street": {"elements": [
+      {"kit": "sky", "moon": [800, 330], "horizon": 1300, "p": 0.15},
+      {"kit": "buildings", "seed": 7, "x0": -900, "x1": 2000, "base_y": 1260, "min_h": 380,
+       "max_h": 820, "win": 18, "lit_ratio": 0.5, "p": 0.45,
+       "palette": ["#1e2539", "#232b42", "#1a2033"]},
+      {"kit": "buildings", "seed": 3, "x0": -900, "x1": 2100, "base_y": 1410, "min_h": 300,
+       "max_h": 640, "min_w": 230, "max_w": 360, "win": 26, "p": 0.75,
+       "palette": ["#33405f", "#3b4768", "#2e3956", "#44507a"]},
+      {"kit": "road", "y": 1410},
+      {"kit": "streetlamp", "x": 160, "base_y": 1450, "h": 820},
+      {"kit": "streetlamp", "x": 860, "base_y": 1450, "h": 820},
+      {"kit": "car", "x": 380, "y": 1640, "color": "#a8483a"}
+    ]},
+    "doorway": {"elements": [
+      {"kit": "backdrop", "color": "#b9a98f", "floor_y": 1700},
+      {"kit": "floor", "y": 1700, "color": "#6e5a48"},
+      {"kit": "door", "x": 300, "y": 560, "w": 480, "h": 1140},
+      {"kit": "frame", "x": 850, "y": 720, "w": 150, "h": 190}
+    ]}
+  },
+
+  "shots": [
+    {"id": "dinner", "dur": 3.6, "set": "kitchen", "lighting": "on",
+     "hud": {"day": 1, "time": "19:42", "place": "Kitchen"},
+     "actors": [{"who": "mum", "x": 330, "y": 1560},
+                {"who": "kid", "x": 830, "y": 1500, "pose": "hold", "hold": "phone", "look": -1}],
+     "camera": {"shot": "wide", "zoom": 1.2, "target": [560, 1120], "move": "push_in", "amount": 0.1},
+     "captions": [{"text": "Thursday night. 7:42.", "at": 0.2, "emph": ["7:42"]},
+                  {"text": "Dinner's nearly ready.", "at": 1.9}]},
+
+    {"id": "lights_out", "dur": 2.9, "set": "kitchen",
+     "lighting": {"off_at": 1.0, "flicker": 0.45},
+     "hud": {"day": 1, "time": "19:42", "place": "Kitchen"},
+     "actors": [{"who": "mum", "x": 330, "y": 1560, "expr": [[0, "neutral"], [1.1, "surprised"]]},
+                {"who": "kid", "x": 830, "y": 1500, "pose": "hold", "hold": "phone",
+                 "expr": [[0, "neutral"], [1.2, "scared"]]}],
+     "camera": {"shot": "wide", "zoom": 1.2, "target": [560, 1120], "shake": [{"at": 1.0, "dur": 0.5, "amp": 14}]},
+     "captions": [{"text": "Then the lights go out.", "at": 1.05, "emph": ["out"]}]},
+
+    {"id": "just_us", "dur": 2.8, "set": "kitchen", "lighting": "off", "dark_tint": "#3d4870",
+     "hud": {"day": 1, "time": "19:42", "place": "Kitchen"},
+     "actors": [{"who": "mum", "x": 330, "y": 1560, "expr": "worried", "look": 1},
+                {"who": "kid", "x": 830, "y": 1500, "pose": "hold", "hold": "torch"}],
+     "camera": {"shot": "close", "target": "mum", "move": "push_in", "amount": 0.06},
+     "captions": [{"text": "It's probably just us... right?", "speaker": "mum", "at": 0.2,
+                   "emph": ["right"]}]},
+
+    {"id": "street_wave", "dur": 4.2, "set": "street",
+     "blackout": {"city": {"start": 0.5, "end": 2.6}},
+     "hud": {"day": 1, "time": "19:43", "place": "Street"},
+     "camera": {"shot": "wide", "move": "pan_right", "amount": 0.08},
+     "captions": [{"text": "It's not just us.", "at": 0.15, "emph": ["not"]},
+                  {"text": "The whole street goes dark.", "at": 1.9, "emph": ["dark"]}]},
+
+    {"id": "notification", "dur": 2.8, "type": "phone",
+     "hud": {"day": 1, "time": "19:43", "place": "Kitchen"},
+     "phone": {"time": "19:43", "date": "Thursday 14 November", "signal": 3, "battery": 23,
+               "sleeve": "#3f6a8f", "skin": "#c98e66",
+               "notifications": [{"at": 0.5, "app": "National Grid", "icon_color": "#ff9f0a",
+                                  "body": "Power cut affecting your area. Estimated restore time: unknown."}]},
+     "captions": [{"text": "One notification.", "at": 0.6, "pos": "bottom", "emph": ["notification"]}]},
+
+    {"id": "no_signal", "dur": 2.6, "type": "phone",
+     "hud": {"day": 1, "time": "19:44", "place": "Kitchen"},
+     "phone": {"time": "19:44", "date": "Thursday 14 November", "signal": [[0, 3], [0.9, 1], [1.3, 0]],
+               "battery": 23, "sleeve": "#3f6a8f", "skin": "#c98e66",
+               "notifications": [{"at": -1, "app": "National Grid", "icon_color": "#ff9f0a",
+                                  "body": "Power cut affecting your area. Estimated restore time: unknown."}]},
+     "captions": [{"text": "Then the signal drops.", "at": 0.3, "pos": "bottom", "emph": ["drops"]}]},
+
+    {"id": "candles", "dur": 2.9, "set": "kitchen", "lighting": "off", "dark_tint": "#38426a",
+     "override": {"clock": {"time": "20:15"}},
+     "hud": {"day": 1, "time": "20:15", "place": "Kitchen"},
+     "actors": [{"who": "mum", "x": 330, "y": 1560, "pose": "hold", "hold": "candle", "expr": "worried"},
+                {"who": "kid", "x": 830, "y": 1500, "pose": "hold", "hold": "torch", "expr": "worried"}],
+     "add": [{"kit": "candle", "id": "c1", "x": 680, "y": 1240, "h": 80, "front": true},
+             {"kit": "candle", "id": "c2", "x": 990, "y": 1240, "h": 60, "front": true}],
+     "camera": {"shot": "wide", "zoom": 1.2, "target": [560, 1120], "move": "push_in", "amount": 0.08},
+     "captions": [{"text": "We light every candle we own.", "at": 0.2, "emph": ["every"]}]},
+
+    {"id": "neighbour", "dur": 2.7, "set": "doorway", "lighting": "off", "dark_tint": "#3d4868",
+     "hud": {"day": 1, "time": "20:31", "place": "Front door"},
+     "actors": [{"who": "neighbour", "x": 540, "y": 1690, "pose": "hold", "hold": "torch", "expr": "serious"}],
+     "camera": {"shot": "medium", "target": "neighbour", "move": "push_in", "amount": 0.06},
+     "captions": [{"text": "Fill every bottle you've got.", "speaker": "neighbour", "at": 0.2,
+                   "emph": ["bottle"]}]},
+
+    {"id": "pumps", "dur": 2.9, "set": "doorway", "lighting": "off", "dark_tint": "#3d4868",
+     "hud": {"day": 1, "time": "20:31", "place": "Front door"},
+     "actors": [{"who": "neighbour", "x": 540, "y": 1690, "pose": "hold", "hold": "torch", "expr": "angry"}],
+     "camera": {"shot": "close", "target": "neighbour", "move": "push_in", "amount": 0.05},
+     "captions": [{"text": "The water pumps run on power.", "speaker": "neighbour", "at": 0.2,
+                   "emph": ["power"]}]},
+
+    {"id": "midnight", "dur": 3.3, "set": "street", "blackout": {"*": "dark"},
+     "hud": {"day": 1, "time": "23:58", "place": "Street"},
+     "camera": {"shot": "wide", "move": "push_in", "amount": 0.1},
+     "captions": [{"text": "By midnight, the city is silent.", "at": 0.3, "emph": ["silent"]}]},
+
+    {"id": "choice", "dur": 4.0, "type": "choice",
+     "choice": {"questions": [{"text": "Do you stay home?", "at": 0.1},
+                              {"text": "Or drive to Gran's?", "at": 1.1, "color": "#ff9f43"},
+                              {"text": "80 miles. Half a tank.", "at": 1.9, "color": "#9aa3b5"}],
+                "options": [{"label": "Stay home", "icon": "home", "color": "#6fb6ff", "at": 0.35},
+                            {"label": "Drive to Gran's", "icon": "car", "color": "#ff9f43", "at": 1.3}],
+                "footer": {"text": "Tell me in the comments ↓", "at": 2.4}}},
+
+    {"id": "end", "dur": 2.5, "type": "end",
+     "end": {"kicker": "Blackout", "title": "DAY 2", "sub": "Follow now for part 2"}}
+  ]
+}
