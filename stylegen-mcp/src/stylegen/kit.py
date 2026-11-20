@@ -646,7 +646,9 @@ def station(ctx, env, el):
 @part("tether")
 def tether(ctx, env, el):
     """Safety tether from a fixed point to an actor's suit (follows the actor as it moves).
-    params: from [x,y], to_actor (actor id) or to [x,y], sag (default 60), color,
+    params: from [x,y], to_actor (actor id) or to [x,y], attach [dx,dy] (clip point on the suit in
+    actor units, default [-60,-330] = left hip; [-125,-330] keeps the line clear of the body),
+    sag (default 60), color,
     cut_at (seconds; the line snaps: the station end whips back, a short stub trails the actor)."""
     ax, ay = el["from"]
 
@@ -661,7 +663,8 @@ def tether(ctx, env, el):
         if el.get("to_actor"):
             a, base = actor(tt)
             s = a.get("scale", 1.0) * base
-            return a.get("x", 540) - 60 * s, a.get("y", 1500) - 330 * s
+            dx, dy = el.get("attach", [-60, -330])
+            return a.get("x", 540) + dx * s, a.get("y", 1500) + dy * s
         return tuple(el.get("to", (ax, ay + 300)))
 
     if el.get("to_actor") and actor()[0] is None:
@@ -739,3 +742,207 @@ def prop(ctx, env, el):
         ctx.translate(-x, 0)
     shapes(ctx, env, e)
     ctx.restore()
+
+
+# ---------------------------------------------------------------- station interior / EVA kit
+@part("module_interior")
+def module_interior(ctx, env, el):
+    """Inside a space-station module, fills the frame: cylindrical wall panels, handrails,
+    cable bundles, light strips. params: color, rail_color, lights (bool),
+    window {"x","y","r","planet": true} (round window onto space/Earth),
+    screens [{"x","y","w","h","alert": bool}] (laptops; alert blinks red)."""
+    import cairo
+    c = g(el, "color", "#d8d4c8")
+    rg = cairo.RadialGradient(540, 960, 150, 540, 960, 1250)
+    rg.add_color_stop_rgba(0, *shade(c, 1.05))
+    rg.add_color_stop_rgba(1, *shade(c, 0.55))
+    ctx.rectangle(-3000, -3000, 7000, 8000)
+    ctx.set_source(rg)
+    ctx.fill()
+    # panel grid
+    for i, x in enumerate(range(-240, 1300, 230)):
+        for j, y in enumerate(range(60, 1900, 270)):
+            k = h01("pan", i, j)
+            fill_rrect(ctx, x + 8, y + 8, 214, 254, 10, shade(c, 0.86 + 0.12 * k), 0.85)
+            if k < 0.35:
+                fill_rrect(ctx, x + 40, y + 50, 60, 36, 4, "#3d4250", 0.8)   # velcro patch
+            if k > 0.7:
+                fill_rrect(ctx, x + 120, y + 180, 70, 14, 3, "#f4f2ea", 0.9)  # label
+            if 0.45 < k < 0.6:
+                circle(ctx, x + 180, y + 60, 14, "#8a8f99")
+    # cable bundles
+    ctx.set_line_cap(1)
+    for i, (y0, colr) in enumerate(((150, "#3a3f4a"), (190, "#5b6270"), (1740, "#3a3f4a"))):
+        ctx.set_line_width(14)
+        col(ctx, colr)
+        ctx.move_to(-200, y0)
+        ctx.curve_to(300, y0 + 90, 700, y0 - 70, 1300, y0 + 40)
+        ctx.stroke()
+    # handrails
+    rc = g(el, "rail_color", "#d9b84a")
+    for (x0, y0, x1) in ((60, 1480, 420), (660, 1480, 1020), (120, 330, 380), (700, 330, 960)):
+        ctx.set_line_width(16)
+        col(ctx, rc)
+        ctx.move_to(x0, y0 + 30)
+        ctx.line_to(x0, y0)
+        ctx.line_to(x1, y0)
+        ctx.line_to(x1, y0 + 30)
+        ctx.stroke()
+    # light strips
+    if g(el, "lights", True):
+        for lx in (-10, 1010):
+            fill_rrect(ctx, lx, 420, 80, 900, 20, "#fff6df")
+            env.emit(ctx, lx + 40, 870, 700, "#fff1d6", 0.8)
+    w = el.get("window")
+    if w:
+        wx, wy, wr = w["x"], w["y"], w.get("r", 200)
+        circle(ctx, wx, wy, wr + 46, "#7e848f")
+        circle(ctx, wx, wy, wr + 22, "#a3a9b3")
+        for k in range(12):
+            a = k / 12 * 2 * math.pi
+            circle(ctx, wx + math.cos(a) * (wr + 34), wy + math.sin(a) * (wr + 34), 7, "#5c626d")
+        ctx.save()
+        ctx.arc(wx, wy, wr, 0, 2 * math.pi)
+        ctx.clip()
+        space(ctx, env, {"stars": 160})
+        if w.get("planet", True):
+            planet(ctx, env, {"x": wx + wr * 0.2, "y": wy + wr * 2.6, "r": wr * 2.2, "spin": 3})
+        ctx.set_source_rgba(1, 1, 1, 0.07)
+        ctx.move_to(wx - wr, wy - wr * 0.2)
+        ctx.line_to(wx + wr * 0.2, wy - wr)
+        ctx.line_to(wx + wr * 0.6, wy - wr)
+        ctx.line_to(wx - wr, wy + wr * 0.3)
+        ctx.fill()
+        ctx.restore()
+        env.emit(ctx, wx, wy, wr * 2.5, "#8fb8ff", 0.5)
+    for sc in g(el, "screens", []):
+        x, y, sw, sh = sc["x"], sc["y"], sc.get("w", 220), sc.get("h", 150)
+        fill_rrect(ctx, x - 10, y - 10, sw + 20, sh + 20, 10, "#2a2d34")
+        alert = sc.get("alert") and (env.t * 2.5) % 1 < 0.6
+        fill_rrect(ctx, x, y, sw, sh, 6, "#5a1414" if alert else "#14324f")
+        for li in range(4):
+            fill_rrect(ctx, x + 16, y + 18 + li * 30, sw * (0.4 + 0.4 * h01("scr", x, li)), 10, 4,
+                       "#ff8a80" if alert else "#7fc4ff", 0.8)
+        if sc.get("alert"):
+            fill_rrect(ctx, x + sw - 60, y + 14, 44, 44, 8, "#ff3b30" if alert else "#7a1c1c")
+        env.emit(ctx, x + sw / 2, y + sh / 2, 260, "#ff5040" if alert else "#6fb0ff", 0.5)
+
+
+@part("hatch")
+def hatch(ctx, env, el):
+    """Round airlock hatch in a wall; opens onto space. params: x,y,r (default 300),
+    open (0 closed .. 1 open; keyframe it), planet (bool, Earth visible through it), color."""
+    import cairo
+    x, y, r = g(el, "x", 540), g(el, "y", 800), g(el, "r", 300)
+    op = max(0.0, min(1.0, g(el, "open", 0)))
+    c = g(el, "color", "#b9bec7")
+    circle(ctx, x, y, r + 70, shade(c, 0.7))
+    # hazard ring
+    ctx.set_line_width(26)
+    for k in range(24):
+        a0 = k / 24 * 2 * math.pi
+        ctx.new_path()
+        ctx.arc(x, y, r + 40, a0, a0 + 2 * math.pi / 24)
+        col(ctx, "#e8b923" if k % 2 == 0 else "#1c1c20")
+        ctx.stroke()
+    circle(ctx, x, y, r + 22, shade(c, 0.85))
+    # what's behind: space
+    ctx.save()
+    ctx.arc(x, y, r, 0, 2 * math.pi)
+    ctx.clip()
+    space(ctx, env, {"stars": 200})
+    if g(el, "planet", True):
+        planet(ctx, env, {"x": x - r * 0.3, "y": y + r * 2.3, "r": r * 2.1, "spin": 3})
+    ctx.restore()
+    if op < 1:
+        ctx.save()
+        ctx.translate(x - r, y)
+        ctx.scale(max(0.04, 1 - op * 0.96), 1)
+        two_tone(ctx, lambda: ctx.arc(r, 0, r - 4, 0, 2 * math.pi), c, r * 1.2, 0.88)
+        ctx.set_line_width(10)
+        col(ctx, shade(c, 0.6))
+        ctx.new_path()
+        ctx.arc(r, 0, r * 0.45, 0, 2 * math.pi)
+        ctx.stroke()
+        for k in range(4):
+            a = k * math.pi / 2 + 0.3
+            ctx.move_to(r, 0)
+            ctx.line_to(r + math.cos(a) * r * 0.45, math.sin(a) * r * 0.45)
+        ctx.stroke()
+        circle(ctx, r, 0, r * 0.1, shade(c, 0.6))
+        fill_rrect(ctx, r - 60, -r * 0.8, 120, 70, 18, "#1b2233")
+        ctx.restore()
+
+
+@part("hull")
+def hull(ctx, env, el):
+    """Close-up of a station module's outer hull (a big curved surface), with insulation
+    blankets, seams, bolts and a row of yellow handrails along its top edge.
+    params: x,y (top-left), w, h, color, rails (bool)"""
+    import cairo
+    x, y, w, h = g(el, "x", -200), g(el, "y", 1200), g(el, "w", 1500), g(el, "h", 1000)
+    c = g(el, "color", "#e6e3da")
+    gr = cairo.LinearGradient(0, y, 0, y + h)
+    gr.add_color_stop_rgba(0, *shade(c, 1.05))
+    gr.add_color_stop_rgba(0.35, *shade(c, 0.92))
+    gr.add_color_stop_rgba(1, *shade(c, 0.45))
+    rrect(ctx, x, y, w, h, 120)
+    ctx.set_source(gr)
+    ctx.fill()
+    ctx.save()
+    rrect(ctx, x, y, w, h, 120)
+    ctx.clip()
+    ctx.set_line_width(4)
+    col(ctx, shade(c, 0.75))
+    for k in range(1, int(w // 260) + 1):
+        ctx.move_to(x + k * 260, y)
+        ctx.line_to(x + k * 260, y + h)
+    ctx.stroke()
+    for k in range(int(w // 260) + 1):
+        for j in range(3):
+            fill_rrect(ctx, x + k * 260 + 30, y + 90 + j * 200, 200, 160, 14, shade(c, 1.02), 0.9)
+            ctx.set_line_width(2)
+            col(ctx, shade(c, 0.8))
+            for s in range(1, 4):
+                ctx.move_to(x + k * 260 + 30, y + 90 + j * 200 + s * 40)
+                ctx.line_to(x + k * 260 + 230, y + 90 + j * 200 + s * 40)
+            ctx.stroke()
+        for j in range(8):
+            circle(ctx, x + k * 260 + 10, y + 40 + j * 110, 6, shade(c, 0.6))
+    fill_rrect(ctx, x + w * 0.62, y + 70, 180, 260, 10, "#c9a24a")
+    ctx.restore()
+    if g(el, "rails", True):
+        ctx.set_line_cap(1)
+        for k in range(int(w // 300)):
+            rx = x + 80 + k * 300
+            ctx.set_line_width(18)
+            col(ctx, "#e0b83a")
+            ctx.move_to(rx, y + 10)
+            ctx.line_to(rx + 20, y - 50)
+            ctx.line_to(rx + 200, y - 50)
+            ctx.line_to(rx + 220, y + 10)
+            ctx.stroke()
+
+
+@part("beacon")
+def beacon(ctx, env, el):
+    """Flashing warning light (amber by default); glows and lights dark scenes.
+    params: x, y, color, period (s), phase"""
+    import cairo
+    x, y = el["x"], el["y"]
+    c = rgba(g(el, "color", "#ff9f0a"))
+    per = g(el, "period", 1.0)
+    k = max(0.0, math.sin(2 * math.pi * (env.t / per + g(el, "phase", 0))))
+    fill_rrect(ctx, x - 40, y + 10, 80, 30, 6, "#2a2c31")
+    ctx.new_sub_path()
+    ctx.arc(x, y + 10, 34, math.pi, 2 * math.pi)
+    ctx.set_source_rgba(c[0], c[1], c[2], 0.5 + 0.5 * k)
+    ctx.fill()
+    if k > 0.05:
+        gl = cairo.RadialGradient(x, y, 0, x, y, 340)
+        gl.add_color_stop_rgba(0, c[0], c[1], c[2], 0.5 * k)
+        gl.add_color_stop_rgba(1, c[0], c[1], c[2], 0)
+        ctx.set_source(gl)
+        ctx.arc(x, y, 340, 0, 2 * math.pi)
+        ctx.fill()
+        env.emit(ctx, x, y, 900, g(el, "color", "#ff9f0a"), 1.1 * k)

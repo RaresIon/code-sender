@@ -20,6 +20,28 @@
    "top": "spacesuit",
    "accent": "#3b7bd9",
    "scale": 0.8
+  },
+  "mike_in": {
+   "skin": "#e2ad8c",
+   "hair": "short",
+   "hair_color": "#5a3b28",
+   "top": "tshirt",
+   "accent": "#d9473b",
+   "scale": 0.8,
+   "top_color": "#2d3e5c",
+   "legs_color": "#3b4250",
+   "shoes_color": "#2a2c33"
+  },
+  "ana_in": {
+   "skin": "#b9825f",
+   "hair": "bun",
+   "hair_color": "#231713",
+   "top": "tshirt",
+   "accent": "#3b7bd9",
+   "scale": 0.8,
+   "top_color": "#6b4a5e",
+   "legs_color": "#3b4250",
+   "shoes_color": "#2a2c33"
   }
  },
  "props": {
@@ -1421,11 +1443,15 @@
      "kit": "tether",
      "id": "t_mike",
      "from": [
-      430,
-      545
+      150,
+      560
      ],
      "to_actor": "mike",
-     "sag": 70
+     "sag": 70,
+     "attach": [
+      -125,
+      -330
+     ]
     },
     {
      "kit": "tether",
@@ -1492,17 +1518,466 @@
      ]
     }
    ]
+  },
+  "module": {
+   "elements": [
+    {
+     "kit": "module_interior",
+     "window": {
+      "x": 540,
+      "y": 600,
+      "r": 210
+     },
+     "screens": [
+      {
+       "x": 110,
+       "y": 930,
+       "w": 230,
+       "h": 150,
+       "alert": true
+      },
+      {
+       "x": 770,
+       "y": 980,
+       "w": 200,
+       "h": 130
+      }
+     ]
+    }
+   ]
+  },
+  "airlock": {
+   "elements": [
+    {
+     "kit": "module_interior",
+     "color": "#9aa0a8",
+     "lights": false
+    },
+    {
+     "kit": "hatch",
+     "id": "hatch",
+     "x": 540,
+     "y": 760,
+     "r": 300,
+     "open": 0
+    },
+    {
+     "kit": "beacon",
+     "x": 150,
+     "y": 240
+    },
+    {
+     "kit": "beacon",
+     "x": 930,
+     "y": 240,
+     "phase": 0.5
+    }
+   ]
+  },
+  "hull": {
+   "elements": [
+    {
+     "kit": "space",
+     "p": 0.08,
+     "nebula": [
+      {
+       "x": 900,
+       "y": 300,
+       "r": 600,
+       "color": "#3b2a6b",
+       "alpha": 0.3
+      }
+     ]
+    },
+    {
+     "kit": "planet",
+     "x": 700,
+     "y": 2350,
+     "r": 1800,
+     "p": 0.3,
+     "night_side": "left"
+    },
+    {
+     "kit": "station",
+     "x": 980,
+     "y": 280,
+     "scale": 0.45,
+     "p": 0.55
+    },
+    {
+     "kit": "hull",
+     "x": -300,
+     "y": 1350,
+     "w": 1700,
+     "h": 1000
+    },
+    {
+     "kit": "tether",
+     "from": [
+      120,
+      1290
+     ],
+     "to_actor": "mike",
+     "sag": 40
+    }
+   ]
+  },
+  "far": {
+   "elements": [
+    {
+     "kit": "space",
+     "p": 0.05,
+     "nebula": [
+      {
+       "x": 200,
+       "y": 300,
+       "r": 700,
+       "color": "#3b2a6b",
+       "alpha": 0.3
+      }
+     ]
+    },
+    {
+     "kit": "planet",
+     "x": 540,
+     "y": 2100,
+     "r": 1500,
+     "p": 0.2,
+     "night_side": "right"
+    },
+    {
+     "kit": "station",
+     "x": 540,
+     "y": 820,
+     "scale": 0.3
+    }
+   ]
   }
  },
  "shots": [
   {
+   "id": "aboard",
+   "dur": 3.8,
+   "set": "module",
+   "hud": {
+    "day": 1,
+    "time": "13:20",
+    "place": "Station \u00b7 Lab"
+   },
+   "actors": [
+    {
+     "who": "mike_in",
+     "x": 300,
+     "y": 1650,
+     "pose": "float",
+     "float": true
+    },
+    {
+     "who": "ana_in",
+     "x": 790,
+     "y": 1600,
+     "pose": "float",
+     "float": true,
+     "look": -1
+    }
+   ],
+   "camera": {
+    "shot": "wide",
+    "zoom": 1.1,
+    "target": [
+     540,
+     1000
+    ],
+    "move": "push_in",
+    "amount": 0.08
+   },
+   "captions": [
+    {
+     "text": "400 km above Earth.",
+     "at": 0.2,
+     "emph": [
+      "Earth"
+     ]
+    },
+    {
+     "text": "Six months on board.",
+     "at": 1.9,
+     "emph": [
+      "Six"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "panel_down",
+   "dur": 2.5,
+   "set": "module",
+   "hud": {
+    "day": 1,
+    "time": "13:21",
+    "place": "Station \u00b7 Lab"
+   },
+   "actors": [
+    {
+     "who": "ana_in",
+     "x": 790,
+     "y": 1600,
+     "pose": "float",
+     "float": true,
+     "expr": "worried"
+    }
+   ],
+   "camera": {
+    "shot": "close",
+    "target": "ana_in",
+    "move": "push_in",
+    "amount": 0.05
+   },
+   "captions": [
+    {
+     "text": "Panel B just went down.",
+     "speaker": "ana_in",
+     "at": 0.2,
+     "emph": [
+      "down"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "go_outside",
+   "dur": 2.5,
+   "set": "module",
+   "hud": {
+    "day": 1,
+    "time": "13:21",
+    "place": "Station \u00b7 Lab"
+   },
+   "actors": [
+    {
+     "who": "mike_in",
+     "x": 300,
+     "y": 1650,
+     "pose": "float",
+     "float": true,
+     "expr": "serious"
+    }
+   ],
+   "camera": {
+    "shot": "close",
+    "target": "mike_in",
+    "move": "push_in",
+    "amount": 0.05
+   },
+   "captions": [
+    {
+     "text": "Then we're going outside.",
+     "speaker": "mike_in",
+     "at": 0.2,
+     "emph": [
+      "outside"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "airlock",
+   "dur": 3.6,
+   "set": "airlock",
+   "lighting": "off",
+   "dark_tint": "#545a70",
+   "hud": {
+    "day": 1,
+    "time": "13:40",
+    "place": "Airlock"
+   },
+   "override": {
+    "hatch": {
+     "open": [
+      [
+       0,
+       0
+      ],
+      [
+       1.4,
+       0
+      ],
+      [
+       3.4,
+       1
+      ]
+     ]
+    }
+   },
+   "actors": [
+    {
+     "who": "mike",
+     "x": 250,
+     "y": 1700,
+     "pose": "float",
+     "float": 0.5
+    },
+    {
+     "who": "ana",
+     "x": 830,
+     "y": 1680,
+     "pose": "float",
+     "float": 0.5
+    }
+   ],
+   "camera": {
+    "shot": "wide",
+    "zoom": 1.05,
+    "move": "push_in",
+    "amount": 0.1,
+    "shake": [
+     {
+      "at": 1.4,
+      "dur": 0.4,
+      "amp": 8
+     }
+    ]
+   },
+   "captions": [
+    {
+     "text": "Depressurising...",
+     "at": 0.2
+    },
+    {
+     "text": "Hatch open.",
+     "at": 2.2,
+     "emph": [
+      "open"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "hull",
+   "dur": 3.2,
+   "set": "hull",
+   "hud": {
+    "day": 1,
+    "time": "13:58",
+    "place": "Station \u00b7 Spacewalk"
+   },
+   "actors": [
+    {
+     "who": "mike",
+     "x": [
+      [
+       0,
+       260
+      ],
+      [
+       3.2,
+       470
+      ]
+     ],
+     "y": 1320,
+     "pose": "reach",
+     "float": 0.4,
+     "rot": -10
+    },
+    {
+     "who": "ana",
+     "x": 860,
+     "y": 1250,
+     "scale": 0.8,
+     "pose": "float",
+     "float": 0.6
+    }
+   ],
+   "camera": {
+    "shot": "wide",
+    "zoom": 1.2,
+    "target": [
+     460,
+     1060
+    ],
+    "roll": [
+     [
+      0,
+      -14
+     ],
+     [
+      3.2,
+      -8
+     ]
+    ],
+    "handheld": 1.2
+   },
+   "captions": [
+    {
+     "text": "Hand over hand, along the hull.",
+     "at": 0.2,
+     "emph": [
+      "hull"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "far",
+   "dur": 3.0,
+   "set": "far",
+   "hud": {
+    "day": 1,
+    "time": "13:59",
+    "place": "Station \u00b7 Spacewalk"
+   },
+   "actors": [
+    {
+     "who": "mike",
+     "x": 410,
+     "y": 950,
+     "scale": 0.17,
+     "pose": "float",
+     "float": 0.3
+    },
+    {
+     "who": "ana",
+     "x": 680,
+     "y": 935,
+     "scale": 0.17,
+     "pose": "float",
+     "float": 0.3
+    }
+   ],
+   "camera": {
+    "shot": "wide",
+    "roll": [
+     [
+      0,
+      8
+     ],
+     [
+      3.0,
+      3
+     ]
+    ],
+    "move": "push_in",
+    "amount": 0.08
+   },
+   "captions": [
+    {
+     "text": "Two specks. One planet.",
+     "at": 0.3,
+     "pos": "low",
+     "emph": [
+      "One"
+     ]
+    }
+   ]
+  },
+  {
    "id": "orbit",
-   "dur": 4.0,
+   "dur": 3.0,
    "set": "orbit",
    "hud": {
     "day": 1,
     "time": "14:06",
-    "place": "ISS \u00b7 Spacewalk"
+    "place": "Station \u00b7 Spacewalk"
    },
    "actors": [
     {
@@ -1527,15 +2002,8 @@
    },
    "captions": [
     {
-     "text": "400 km above Earth.",
+     "text": "Hour three of the spacewalk.",
      "at": 0.2,
-     "emph": [
-      "Earth"
-     ]
-    },
-    {
-     "text": "Spacewalk, hour three.",
-     "at": 1.9,
      "emph": [
       "three"
      ]
@@ -1549,7 +2017,7 @@
    "hud": {
     "day": 1,
     "time": "14:06",
-    "place": "ISS \u00b7 Spacewalk"
+    "place": "Station \u00b7 Spacewalk"
    },
    "actors": [
     {
@@ -1582,7 +2050,7 @@
    "hud": {
     "day": 1,
     "time": "14:07",
-    "place": "ISS \u00b7 Spacewalk"
+    "place": "Station \u00b7 Spacewalk"
    },
    "actors": [
     {
@@ -1628,7 +2096,7 @@
    "hud": {
     "day": 1,
     "time": "14:07",
-    "place": "ISS \u00b7 Spacewalk"
+    "place": "Station \u00b7 Spacewalk"
    },
    "override": {
     "alien": {
@@ -1721,7 +2189,7 @@
    "hud": {
     "day": 1,
     "time": "14:07",
-    "place": "ISS \u00b7 Spacewalk"
+    "place": "Station \u00b7 Spacewalk"
    },
    "override": {
     "alien": {
@@ -1771,28 +2239,44 @@
    "hud": {
     "day": 1,
     "time": "14:08",
-    "place": "ISS \u00b7 Spacewalk"
+    "place": "Station \u00b7 Spacewalk"
    },
    "override": {
     "alien": {
      "x": [
       [
        0,
-       20
+       -131.0431649379346
       ],
       [
        0.95,
-       60
+       -41.04316493793459
+      ],
+      [
+       1.05,
+       -41.04316493793459
+      ],
+      [
+       1.7,
+       -81.04316493793459
       ]
      ],
      "y": [
       [
        0,
-       900
+       805.4117998431507
       ],
       [
        0.95,
-       790
+       745.4117998431507
+      ],
+      [
+       1.05,
+       745.4117998431507
+      ],
+      [
+       1.7,
+       715.4117998431507
       ]
      ],
      "alpha": 1,
@@ -1803,10 +2287,14 @@
       ],
       [
        0.95,
-       8
+       0
       ],
       [
-       1.6,
+       1.05,
+       0
+      ],
+      [
+       1.7,
        -6
       ]
      ]
@@ -1864,10 +2352,10 @@
    ],
    "camera": {
     "shot": "wide",
-    "zoom": 1.3,
+    "zoom": 1.25,
     "target": [
-     320,
-     960
+     260,
+     930
     ],
     "shake": [
      {
@@ -1894,7 +2382,7 @@
    "hud": {
     "day": 1,
     "time": "14:08",
-    "place": "ISS \u00b7 Spacewalk"
+    "place": "Station \u00b7 Spacewalk"
    },
    "override": {
     "t_mike": {
@@ -1944,7 +2432,7 @@
    "hud": {
     "day": 1,
     "time": "14:08",
-    "place": "ISS \u00b7 Spacewalk"
+    "place": "Station \u00b7 Spacewalk"
    },
    "override": {
     "t_mike": {
@@ -2281,7 +2769,7 @@
    "hud": {
     "day": 1,
     "time": "14:09",
-    "place": "ISS \u00b7 Spacewalk"
+    "place": "Station \u00b7 Spacewalk"
    },
    "actors": [
     {

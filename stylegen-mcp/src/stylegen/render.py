@@ -147,10 +147,11 @@ def anim(v, t):
 
 
 def resolve(item, t, keys=ANIM_KEYS):
+    """Animate every top-level numeric keyframe list (x, y, scale, rot, alpha, open, ...)."""
     r = dict(item)
-    for k in keys:
-        if k in r:
-            r[k] = anim(r[k], t)
+    for k, v in r.items():
+        if is_kf(v):
+            r[k] = anim(v, t)
     return r
 
 
@@ -177,7 +178,8 @@ def camera(shot, t):
     u = ease(t / dur) if c.get("ease", True) else t / dur
     cam = Cam()
     kind = c.get("shot", "wide")
-    cam.zoom = ZOOMS[kind] * c.get("zoom", 1.0)
+    cam.zoom = ZOOMS[kind] * anim(c.get("zoom", 1.0), t)
+    cam.roll = anim(c.get("roll", 0), t)
     tgt = c.get("target")
     cx, cy = 540, 960
     if isinstance(tgt, str):
@@ -186,6 +188,10 @@ def camera(shot, t):
         cy = a.get("y", 1500) + FOCUS_Y[kind] * a.get("scale", 1.0) * c.get("_cs", 1.0)
     elif isinstance(tgt, list):
         cx, cy = tgt
+    if "x" in c:
+        cx = anim(c["x"], t)
+    if "y" in c:
+        cy = anim(c["y"], t)
     amt = c.get("amount", 0.12)
     mv = c.get("move", "static")
     if mv == "push_in":
@@ -214,6 +220,8 @@ def camera(shot, t):
 def apply_cam(ctx, cam, p):
     z = 1 + (cam.zoom - 1) * p
     ctx.translate(W / 2 + cam.sx, H / 2 + cam.sy)
+    if cam.roll:
+        ctx.rotate(math.radians(cam.roll))
     ctx.scale(z, z)
     ctx.translate(-(540 + (cam.cx - 540) * p), -(960 + (cam.cy - 960) * p))
 

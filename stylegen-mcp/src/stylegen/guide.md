@@ -73,6 +73,8 @@ Common keys: `id`, `dur` (seconds, required), `type` (scene|phone|choice|end, de
   "zoom": 1.0, "move": "static|push_in|pull_out|pan_left|pan_right|rise", "amount": 0.12,
   "handheld": 1.0, "shake": [{"at": 1.0, "dur": 0.5, "amp": 14}]}`
   - `medium`/`close` with an actor target frame the chest/face automatically.
+  - `roll` (degrees) tilts the camera -- great for zero-g / disorientation; `x`, `y`, `zoom` and
+    `roll` all accept keyframes for fully custom camera paths, e.g. `"roll": [[0, -14], [3, -8]]`.
   - For wide interiors, `zoom 1.15-1.25` with `target [540, 1100]` fills the frame better.
 - `lighting`: `"on"` | `"off"` | `{"off_at": 1.0, "flicker": 0.45}` (lights cut mid-shot).
   Dark shots multiply everything by `dark_tint` and add light sources (candles, torches,
@@ -104,7 +106,8 @@ Use this for things entering, fading in, drifting, being pulled away (shrink `sc
 and fade `alpha` to send something "into the distance"). To move two things together, give
 them keyframes at the same times. Recurring props: define them once in the set with an `id` and
 `"alpha": 0`, then reveal/move them per shot via `override`.
-Elements rotate around their own `x,y`.
+Elements rotate around their own `x,y`. Any other numeric part setting can be keyframed too,
+e.g. a hatch opening: `"open": [[0, 0], [1.4, 0], [3.4, 1]]`.
 
 ## Captions
 `{"text": "...", "at": 0.2, "emph": ["word"], "speaker": "<cast id>", "pos": "auto|top|mid|low|bottom",
