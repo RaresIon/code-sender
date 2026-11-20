@@ -27,11 +27,21 @@ def validate(ep):
             errs.append(f"missing top-level '{k}'")
     cast = ep.get("cast", {})
     sets = ep.get("sets", {})
+    props = ep.get("props", {})
+    for pn, pd in props.items():
+        for base in pd.get("extends", []):
+            if base not in props:
+                errs.append(f"prop '{pn}' extends unknown prop '{base}'")
+
+    def check_el(where, e):
+        if e.get("kit") not in KIT:
+            errs.append(f"{where}: unknown kit '{e.get('kit')}' (known: {sorted(KIT)})")
+        elif e["kit"] == "prop" and e.get("name") not in props:
+            errs.append(f"{where}: prop '{e.get('name')}' not defined in top-level 'props'")
+
     for sn, s in sets.items():
         for i, e in enumerate(s.get("elements", [])):
-            if e.get("kit") not in KIT:
-                errs.append(f"set '{sn}' element {i}: unknown kit '{e.get('kit')}' "
-                            f"(known: {sorted(KIT)})")
+            check_el(f"set '{sn}' element {i}", e)
     for i, sh in enumerate(ep.get("shots", [])):
         tag = f"shot {i} ({sh.get('id', '?')})"
         if sh.get("type", "scene") not in SHOT_TYPES:
@@ -51,8 +61,7 @@ def validate(ep):
             if isinstance(tgt, str) and tgt not in [a.get("who") for a in sh.get("actors", [])]:
                 errs.append(f"{tag}: camera target '{tgt}' is not in this shot")
             for e in sh.get("add", []):
-                if e.get("kit") not in KIT:
-                    errs.append(f"{tag}: unknown kit '{e.get('kit')}'")
+                check_el(tag, e)
         for c in sh.get("captions", []):
             spk = c.get("speaker")
             if spk and spk not in cast:
@@ -71,6 +80,7 @@ class Env:
         self.shot = shot
         self.lights = []
         self.faces = []
+        self.props = ep.get("props", {})
         self.lights_on = lights_level(shot, t)
         self.speaker = ui.active_speaker(shot, t)
 

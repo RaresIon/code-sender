@@ -708,3 +708,34 @@ def tether(ctx, env, el):
             d = dt * (300 + 500 * h01("spd", i))
             circle(ctx, px + math.cos(a) * d, py + math.sin(a) * d, 5 * (1 - dt / 0.45),
                    "#ffd36b", 1 - dt / 0.45)
+
+
+def _prop_shapes(env, name, seen=()):
+    if name in seen:
+        return []
+    d = getattr(env, "props", {}).get(name)
+    if d is None:
+        return []
+    out = []
+    for base in d.get("extends", []):
+        out += _prop_shapes(env, base, seen + (name,))
+    return out + list(d.get("shapes", []))
+
+
+@part("prop")
+def prop(ctx, env, el):
+    """A named, reusable shapes-prop defined once in the episode's top-level "props":
+    {"<name>": {"shapes": [...], "extends": ["<other prop>"], "flat_shade": true}}.
+    params: name, x, y, scale, rot, alpha, flip (mirror horizontally)."""
+    d = getattr(env, "props", {}).get(el["name"], {})
+    e = dict(el)
+    e["shapes"] = _prop_shapes(env, el["name"])
+    e.setdefault("flat_shade", d.get("flat_shade", True))
+    ctx.save()
+    if el.get("flip"):
+        x = el.get("x", 0)
+        ctx.translate(x, 0)
+        ctx.scale(-1, 1)
+        ctx.translate(-x, 0)
+    shapes(ctx, env, e)
+    ctx.restore()

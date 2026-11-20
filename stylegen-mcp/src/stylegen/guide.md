@@ -118,6 +118,24 @@ Elements rotate around their own `x,y`.
 `blackout` (kitchen/street/doorway, lighting cuts) is included below. `spacewalk` (orbit, station,
 tethers, a `shapes` alien, keyframed kidnapping) ships in `examples/spacewalk.json` of the package.
 
+## Named props (define once, reuse everywhere)
+Put recurring props in a top-level `"props"` map and place them with the `prop` part:
+```json
+"props": {
+  "alien_body": {"shapes": [ ... ]},
+  "alien":      {"extends": ["alien_body"], "shapes": [ ...arms out... ]},
+  "alien_grip": {"extends": ["alien_body"], "shapes": [ ...arms forward... ]}
+}
+... {"kit": "prop", "name": "alien", "x": 140, "y": 1050, "scale": 0.75, "flip": false}
+```
+`extends` composes variants (poses, damage, outfits) from a shared base. Coordinates are
+relative to the prop origin; pick the origin so the prop is easy to place (body centre, or the
+point it attaches to).
+**Attaching props to a character** (e.g. hands gripping shoulders): use the character's head
+centre `(x, y - 668*s)` as the prop origin, with prop `scale = s` (s = cast scale x actor scale)
+and the SAME keyframe times as the actor, so they move together. `front: true` draws it over the
+character.
+
 ## Missing props
 If no part fits, build it with `shapes` (rects, circles, ellipses, polygons, lines, text) in
 2-4 flat colours. Use `light` to add glow sources in dark scenes. Preview it.
