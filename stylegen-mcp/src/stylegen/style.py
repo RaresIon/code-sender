@@ -72,7 +72,7 @@ def two_tone(ctx, path_fn, c, split_x, dark=0.86):
     ctx.fill_preserve()
     ctx.save()
     ctx.clip()
-    ctx.rectangle(split_x, -1e5, 2e5, 2e5)
+    ctx.rectangle(split_x, -6000, 12000, 12000)
     ctx.set_source_rgba(*shade(c, dark))
     ctx.fill()
     ctx.restore()

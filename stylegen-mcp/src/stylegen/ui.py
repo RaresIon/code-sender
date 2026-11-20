@@ -317,6 +317,29 @@ def icon(ctx, name, x, y, c):
     elif name == "door":
         fill_rrect(ctx, x - 32, y - 52, 64, 104, 4, c)
         circle(ctx, x + 18, y, 5, "#141821")
+    elif name == "rocket":
+        ctx.new_path()
+        ctx.move_to(x, y - 62)
+        ctx.curve_to(x + 30, y - 40, x + 26, y + 10, x + 22, y + 30)
+        ctx.line_to(x - 22, y + 30)
+        ctx.curve_to(x - 26, y + 10, x - 30, y - 40, x, y - 62)
+        ctx.fill()
+        for sg in (-1, 1):
+            ctx.new_path()
+            ctx.move_to(x + sg * 22, y + 4)
+            ctx.line_to(x + sg * 44, y + 40)
+            ctx.line_to(x + sg * 18, y + 30)
+            ctx.fill()
+        circle(ctx, x, y - 18, 11, "#141821")
+        fill_rrect(ctx, x - 12, y + 34, 24, 22, 6, "#ffb43b")
+    elif name == "airlock":
+        circle(ctx, x, y, 48, c)
+        circle(ctx, x, y, 32, "#141821")
+        ctx.set_line_width(6)
+        col(ctx, c)
+        ctx.move_to(x - 32, y)
+        ctx.line_to(x + 32, y)
+        ctx.stroke()
     else:
         circle(ctx, x, y, 40, c)
 

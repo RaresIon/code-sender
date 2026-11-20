@@ -3,7 +3,7 @@
 Local coordinates: feet centre at (0,0), y grows downward, ~690 units tall at scale 1.
 """
 import math
-from .style import col, shade, rrect, circle, two_tone, rgba
+from .style import col, shade, rrect, circle, two_tone, rgba, fill_rrect
 from .rng import h01, noise1
 
 DEFAULTS = {
@@ -40,6 +40,8 @@ def hand_targets(pose, build):
         "spread": ((-330, -520), (330, -520)),
         "raise": ((-sx - 14, -330), (sx + 40, -720)),
         "hips": ((-sx - 30, -400), (sx + 30, -400)),
+        "float": ((-sx - 70, -450), (sx + 70, -470)),
+        "reach": ((-sx - 14, -330), (sx + 150, -640)),
     }
     return poses.get(pose, poses["down"])
 
@@ -47,6 +49,12 @@ def hand_targets(pose, build):
 def draw_character(ctx, env, spec, state):
     p = dict(DEFAULTS)
     p.update(spec)
+    suit = p["top"] == "spacesuit"
+    if suit:  # astronaut EVA suit: white body, grey boots/gloves, helmet drawn later
+        p.setdefault("suit_color", "#eceef2")
+        p["top_color"] = p.get("suit_color", "#eceef2")
+        p["legs_color"] = shade(p["top_color"], 0.95)
+        p["shoes_color"] = "#8f96a3"
     s = p["scale"] * state.get("scale", 1.0)
     b = p["build"]
     t = env.t
@@ -54,6 +62,11 @@ def draw_character(ctx, env, spec, state):
     ctx.save()
     ctx.translate(state.get("x", 540), state.get("y", 1500))
     ctx.scale(s, s)
+    rot = state.get("rot", 0)
+    if rot:  # rotate the whole body around its middle
+        ctx.translate(0, -345)
+        ctx.rotate(math.radians(rot))
+        ctx.translate(0, 345)
 
     # idle: breathing + sway, deterministic per character
     breathe = math.sin(t * 2.1 + h01(cid) * 6) * 3
@@ -68,6 +81,10 @@ def draw_character(ctx, env, spec, state):
         col(ctx, p["hair_color"])
         ctx.fill()
 
+    if suit:  # life-support backpack behind the body
+        rrect(ctx, -tw - 26, SHOULDER_Y - 40, 2 * tw + 52, 330, 30)
+        col(ctx, "#c9ced6")
+        ctx.fill()
     # legs + shoes
     for sgn in (-1, 1):
         lx = sgn * 34 * b
@@ -133,6 +150,15 @@ def draw_character(ctx, env, spec, state):
         rrect(ctx, -70, -400, 140, 70, 18)
         col(ctx, shade(p["top_color"], 0.9))
         ctx.fill()
+    elif top == "spacesuit":
+        acc = p.get("accent", "#d9473b")
+        fill_rrect(ctx, -70, ty + 70, 140, 110, 14, "#d6dae1")
+        for i, c in enumerate(("#d9473b", "#3b7bd9", "#4fbf6a")):
+            circle(ctx, -40 + i * 40, ty + 125, 12, c)
+        circle(ctx, -tw + 50, ty + 60, 26, acc)
+        rrect(ctx, -tw + 4, -330, 2 * tw - 8, 26, 8)
+        col(ctx, "#b8bec8")
+        ctx.fill()
     else:  # tshirt
         ctx.new_path()
         ctx.arc(0, ty - 2, 34, 0, math.pi)
@@ -148,6 +174,7 @@ def draw_character(ctx, env, spec, state):
     pose = state.get("pose", "down")
     lh, rh = hand_targets(pose, b)
     sleeve = p["top_color"]
+    glove = "#c3c8d0" if suit else skin
     hands = []
     for sgn, hand in ((-1, lh), (1, rh)):
         sx, sy = sgn * (tw - 8), ty + 26
@@ -161,6 +188,16 @@ def draw_character(ctx, env, spec, state):
             ctx.line_to(sgn * (tw + 10), -390)
         ctx.line_to(hx, hy - 18)
         ctx.stroke()
+        if suit:  # accent band on the upper arm
+            ctx.set_line_width(56 * b)
+            ctx.set_line_cap(0)
+            col(ctx, p.get("accent", "#d9473b"))
+            mx, my = sx + (hx - sx) * 0.28, sy + (hy - 18 - sy) * 0.28
+            dx, dy = (hx - sx) * 0.06, (hy - 18 - sy) * 0.06
+            ctx.move_to(mx - dx, my - dy)
+            ctx.line_to(mx + dx, my + dy)
+            ctx.stroke()
+            ctx.set_line_cap(1)
         hands.append((hx, hy))
 
     # head
@@ -195,6 +232,8 @@ def draw_character(ctx, env, spec, state):
         ctx.move_to(-11, -4)
         ctx.line_to(11, -4)
         ctx.stroke()
+    if suit:
+        _helmet(ctx)
     ctx.restore()
 
     # held item + hands on top
@@ -202,9 +241,30 @@ def draw_character(ctx, env, spec, state):
     if hold:
         _held(ctx, env, hold, hands[1] if pose != "hold_both" else (0, -420), cid)
     for (hx, hy) in hands:
-        circle(ctx, hx, hy, 30, skin)
-        circle(ctx, hx + 8, hy + 2, 22, shade(skin, 0.92))
+        circle(ctx, hx, hy, 34 if suit else 30, glove)
+        circle(ctx, hx + 8, hy + 2, 24 if suit else 22, shade(glove, 0.92))
     ctx.restore()
+
+
+def _helmet(ctx):
+    """Clear bubble helmet over the head (face stays readable)."""
+    r = 122
+    ctx.new_sub_path()
+    ctx.arc(0, -4, r, 0, 2 * math.pi)
+    ctx.set_source_rgba(0.7, 0.82, 1.0, 0.16)
+    ctx.fill_preserve()
+    ctx.set_line_width(14)
+    col(ctx, "#dfe2e8")
+    ctx.stroke()
+    ctx.set_line_width(9)
+    ctx.set_line_cap(1)
+    ctx.set_source_rgba(1, 1, 1, 0.55)
+    ctx.arc(0, -4, r - 22, math.radians(200), math.radians(245))
+    ctx.stroke()
+    circle(ctx, -62, -70, 7, "#ffffff", 0.6)
+    rrect(ctx, -90, r - 32, 180, 36, 14)
+    col(ctx, "#c9ced6")
+    ctx.fill()
 
 
 def _face(ctx, env, p, state, cid):

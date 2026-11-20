@@ -114,6 +114,48 @@ def lights_level(shot, t):
     return 1.0 if noise1(t * 22, "flick") > -0.1 else 0.15
 
 
+# ---------------------------------------------------------------- keyframes
+ANIM_KEYS = ("x", "y", "scale", "rot", "alpha", "look")
+
+
+def is_kf(v):
+    return (isinstance(v, list) and v and all(
+        isinstance(k, (list, tuple)) and len(k) == 2 and isinstance(k[0], (int, float))
+        and isinstance(k[1], (int, float)) for k in v))
+
+
+def anim(v, t):
+    """Numeric value or [[t, v], ...] keyframes (eased between keys)."""
+    if not is_kf(v):
+        return v
+    if t <= v[0][0]:
+        return v[0][1]
+    for (t0, a), (t1, b) in zip(v, v[1:]):
+        if t <= t1:
+            return lerp(a, b, ease((t - t0) / max(1e-6, t1 - t0)))
+    return v[-1][1]
+
+
+def resolve(item, t, keys=ANIM_KEYS):
+    r = dict(item)
+    for k in keys:
+        if k in r:
+            r[k] = anim(r[k], t)
+    return r
+
+
+def resolve_actor(a, t):
+    r = resolve(a, t)
+    fl = r.get("float")
+    if fl:
+        amp = 1.0 if fl is True else float(fl)
+        ph = h01(r.get("who", "a"), "float") * 6.28
+        r["x"] = r.get("x", 540) + math.cos(t * 0.9 + ph) * 10 * amp
+        r["y"] = r.get("y", 1500) + math.sin(t * 1.2 + ph) * 16 * amp
+        r["rot"] = r.get("rot", 0) + math.sin(t * 0.8 + ph) * 4 * amp
+    return r
+
+
 # ---------------------------------------------------------------- camera
 class Cam:
     pass
@@ -129,7 +171,7 @@ def camera(shot, t):
     tgt = c.get("target")
     cx, cy = 540, 960
     if isinstance(tgt, str):
-        a = next(a for a in shot.get("actors", []) if a.get("who") == tgt)
+        a = resolve_actor(next(a for a in shot.get("actors", []) if a.get("who") == tgt), t)
         cx = a.get("x", 540)
         cy = a.get("y", 1500) + FOCUS_Y[kind] * a.get("scale", 1.0) * c.get("_cs", 1.0)
     elif isinstance(tgt, list):
@@ -173,20 +215,47 @@ def render_scene(ctx, ep, shot, t, env):
     elements = [dict(e, **ov.get(e.get("id"), {})) for e in st.get("elements", [])]
     elements += list(shot.get("add", []))
     cam = camera(shot, t)
+    raw_actors = shot.get("actors", [])
+    env.actor_at = lambda who, tt=None: resolve_actor(
+        next(a for a in raw_actors if a.get("who") == who), t if tt is None else tt)
+    env.cast = ep["cast"]
 
     def draw_el(e):
+        e = resolve(e, t)
+        alpha = e.get("alpha", 1.0)
+        if alpha <= 0.001:
+            return
         ctx.save()
         apply_cam(ctx, cam, e.get("p", 1.0))
+        if e.get("rot"):
+            ox, oy = e.get("x", 0), e.get("y", 0)
+            ctx.translate(ox, oy)
+            ctx.rotate(math.radians(e["rot"]))
+            ctx.translate(-ox, -oy)
+        if alpha < 1:
+            ctx.push_group()
         KIT[e["kit"]](ctx, env, e)
+        if alpha < 1:
+            ctx.pop_group_to_source()
+            ctx.paint_with_alpha(alpha)
         ctx.restore()
 
     for e in elements:
         if not e.get("front"):
             draw_el(e)
-    for a in sorted(shot.get("actors", []), key=lambda a: a.get("y", 1500)):
+    actors = [resolve_actor(a, t) for a in raw_actors]
+    for a in sorted(actors, key=lambda a: a.get("z", a.get("y", 1500))):
+        alpha = a.get("alpha", 1.0)
+        if alpha <= 0.001:
+            continue
         ctx.save()
         apply_cam(ctx, cam, 1.0)
+        if alpha < 1:
+            ctx.push_group()
         draw_character(ctx, env, ep["cast"][a["who"]], a)
+        if alpha < 1:
+            ctx.pop_group_to_source()
+            ctx.paint_with_alpha(alpha)
         ctx.restore()
     for e in elements:
         if e.get("front"):

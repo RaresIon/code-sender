@@ -46,9 +46,11 @@ Element params common to all parts:
 - `id` (string): lets a shot override params with `"override": {"<id>": {...}}`.
 
 ## Characters (`cast`)
-`skin`, `hair` (short|bob|long|bun|bald), `hair_color`, `top` (tshirt|hoodie|jacket),
+`skin`, `hair` (short|bob|long|bun|bald), `hair_color`, `top` (tshirt|hoodie|jacket|spacesuit),
 `top_color`, `shirt_color` (jacket only), `tie` (colour or null, jacket only), `legs_color`,
 `shoes_color`, `glasses` (bool), `scale` (child ~0.8, adult 1.0, big adult 1.05-1.1), `build` (0.9-1.2 width).
+`spacesuit` = white EVA suit, backpack, bubble helmet (face stays visible); `accent` colours the
+arm bands and patch so astronauts are distinguishable.
 Use muted, slightly desaturated colours (e.g. #8a4a5a, #3f6a8f, #5b5e3a, #2f3442).
 
 ## Shots
@@ -58,7 +60,10 @@ Common keys: `id`, `dur` (seconds, required), `type` (scene|phone|choice|end, de
 ### scene
 - `set`: set id. `add`: extra elements just for this shot. `override`: {element id: params}.
 - `actors`: `[{"who", "x", "y" (feet), "pose", "expr", "hold", "look", "scale"}]`
-  - `pose`: down | hold (right hand up, holds item) | hold_both | spread (arms out, blocking) | raise | hips
+  - `pose`: down | hold (right hand up, holds item) | hold_both | spread (arms out, blocking) | raise |
+    hips | float (arms loose, zero-g) | reach (one arm stretched up/out)
+  - `rot` (degrees, whole body), `alpha` (0-1), `z` (draw order; default = y)
+  - `float`: true or amplitude (e.g. 1.6) -- zero-gravity drift and slow tumble
   - `expr`: neutral | happy | worried | scared | angry | serious | surprised,
     or keyframes `[[0,"neutral"],[1.2,"scared"]]`
   - `hold`: phone | torch | candle (each also emits light in dark shots)
@@ -91,6 +96,16 @@ Signal 0 shows "No Service". Use `"pos": "bottom"` for captions on phone shots.
 ### end
 `"end": {"kicker": "Blackout", "title": "DAY 2", "sub": "Follow now for part 2"}`
 
+## Motion (keyframes)
+Any actor's or element's `x`, `y`, `scale`, `rot`, `alpha` (and actor `look`) may be a number
+or keyframes `[[t, value], ...]` (shot-local seconds, eased between keys):
+`"x": [[0, 380], [3.0, 440]], "alpha": [[0, 0], [1.2, 1]]`.
+Use this for things entering, fading in, drifting, being pulled away (shrink `scale` toward ~0.05
+and fade `alpha` to send something "into the distance"). To move two things together, give
+them keyframes at the same times. Recurring props: define them once in the set with an `id` and
+`"alpha": 0`, then reveal/move them per shot via `override`.
+Elements rotate around their own `x,y`.
+
 ## Captions
 `{"text": "...", "at": 0.2, "emph": ["word"], "speaker": "<cast id>", "pos": "auto|top|mid|low|bottom",
 "rate": 1.0, "color": "#7ee07a", "until": 2.5}`
@@ -98,6 +113,10 @@ Signal 0 shows "No Service". Use `"pos": "bottom"` for captions on phone shots.
   . ! ?, +0.12 s after , ; ... (divide by `rate`). `validate_episode` reports each caption's end time.
 - Several captions in one shot play in sequence; each disappears when the next starts.
 - `pos: auto` (default) avoids covering faces.
+
+## Example episodes
+`blackout` (kitchen/street/doorway, lighting cuts) is included below. `spacewalk` (orbit, station,
+tethers, a `shapes` alien, keyframed kidnapping) ships in `examples/spacewalk.json` of the package.
 
 ## Missing props
 If no part fits, build it with `shapes` (rects, circles, ellipses, polygons, lines, text) in

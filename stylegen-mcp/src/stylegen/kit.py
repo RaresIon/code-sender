@@ -496,3 +496,215 @@ def light(ctx, env, el):
     params: x,y,radius,color,intensity(0-1.5)"""
     env.emit(ctx, el["x"], el["y"], g(el, "radius", 400), g(el, "color", "#ffd9a0"),
              g(el, "intensity", 0.8))
+
+
+# ---------------------------------------------------------------- space kit
+@part("space")
+def space(ctx, env, el):
+    """Deep-space backdrop: dark gradient, dense stars, optional nebula glows.
+    params: top, bottom, stars (count, default 320), nebula: [{"x","y","r","color","alpha"}]. Use p 0.05-0.2."""
+    import cairo
+    gr = cairo.LinearGradient(0, -800, 0, 2700)
+    gr.add_color_stop_rgba(0, *rgba(g(el, "top", "#020309")))
+    gr.add_color_stop_rgba(1, *rgba(g(el, "bottom", "#0b1530")))
+    ctx.rectangle(-5000, -5000, 11000, 11000)
+    ctx.set_source(gr)
+    ctx.fill()
+    for nb in g(el, "nebula", []):
+        r, c = nb.get("r", 500), rgba(nb.get("color", "#5b3d8a"))
+        ng = cairo.RadialGradient(nb["x"], nb["y"], 0, nb["x"], nb["y"], r)
+        ng.add_color_stop_rgba(0, c[0], c[1], c[2], nb.get("alpha", 0.35))
+        ng.add_color_stop_rgba(1, c[0], c[1], c[2], 0)
+        ctx.set_source(ng)
+        ctx.arc(nb["x"], nb["y"], r, 0, 2 * math.pi)
+        ctx.fill()
+    for i in range(g(el, "stars", 320)):
+        tw = 0.65 + 0.35 * math.sin(env.t * (0.8 + h01(i, "stw") * 2.5) + i)
+        r = 1.0 + 2.6 * h01("ssr", i) ** 3
+        circle(ctx, -900 + h01("ssx", i) * 2900, -700 + h01("ssy", i) * 3300, r,
+               "#ffffff", (0.25 + 0.7 * h01("ssa", i)) * tw)
+
+
+@part("planet")
+def planet(ctx, env, el):
+    """Big planet seen from orbit (Earth by default). params: x,y (centre), r, ocean, land,
+    cloud, atmo (glow colour), night_side ('left'|'right'|None), seed, spin (deg/s)."""
+    import cairo
+    x, y, r = g(el, "x", 540), g(el, "y", 2600), g(el, "r", 1400)
+    atmo = rgba(g(el, "atmo", "#7fc4ff"))
+    ag = cairo.RadialGradient(x, y, r * 0.96, x, y, r * 1.12)
+    ag.add_color_stop_rgba(0, atmo[0], atmo[1], atmo[2], 0.7)
+    ag.add_color_stop_rgba(1, atmo[0], atmo[1], atmo[2], 0)
+    ctx.set_source(ag)
+    ctx.arc(x, y, r * 1.12, 0, 2 * math.pi)
+    ctx.fill()
+    circle(ctx, x, y, r, g(el, "ocean", "#2c6aa8"))
+    ctx.save()
+    ctx.arc(x, y, r, 0, 2 * math.pi)
+    ctx.clip()
+    seed = g(el, "seed", 5)
+    drift = env.t * g(el, "spin", 6)
+    for i in range(26):
+        bx = x - r + ((h01(seed, i, "bx") * 2 * r + drift) % (2 * r))
+        by = y - r * 0.95 + h01(seed, i, "by") * r * 0.7
+        br = r * (0.05 + 0.12 * h01(seed, i, "br"))
+        circle(ctx, bx, by, br, g(el, "land", "#4f8a4a"))
+        circle(ctx, bx + br * 0.6, by + br * 0.3, br * 0.7, g(el, "land", "#4f8a4a"))
+    for i in range(30):
+        cx = x - r + ((h01(seed, i, "cx") * 2 * r + drift * 1.6) % (2 * r))
+        cy = y - r * 0.97 + h01(seed, i, "cy") * r * 0.75
+        ctx.save()
+        ctx.translate(cx, cy)
+        ctx.scale(1, 0.35)
+        circle(ctx, 0, 0, r * (0.04 + 0.08 * h01(seed, i, "cr")), g(el, "cloud", "#ffffff"), 0.55)
+        ctx.restore()
+    side = g(el, "night_side", "right")
+    if side:
+        sgn = 1 if side == "right" else -1
+        sh = cairo.LinearGradient(x - sgn * r * 0.2, 0, x + sgn * r, 0)
+        sh.add_color_stop_rgba(0, 0.01, 0.02, 0.06, 0)
+        sh.add_color_stop_rgba(1, 0.01, 0.02, 0.06, 0.85)
+        ctx.set_source(sh)
+        ctx.paint()
+    ctx.restore()
+
+
+@part("station")
+def station(ctx, env, el):
+    """Modular space station seen side-on: long truss, solar arrays at both ends, pressurised
+    modules and an airlock in the middle. params: x,y (centre of truss), scale, span (truss
+    half-length, default 900), module_color, panel_color. Airlock hatch is at (x+0, y+150*scale)."""
+    x, y, sc = g(el, "x", 540), g(el, "y", 600), g(el, "scale", 1.0)
+    span = g(el, "span", 900)
+    mc = g(el, "module_color", "#e3e1da")
+    pc = g(el, "panel_color", "#1f3f7a")
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(sc, sc)
+    # solar arrays (behind truss)
+    for sgn in (-1, 1):
+        for k in range(2):
+            ax = sgn * (span - 120 - k * 230)
+            for vs in (-1, 1):
+                py = -40 - 560 if vs < 0 else 40
+                fill_rrect(ctx, ax - 95, py, 190, 560, 4, pc)
+                ctx.set_line_width(3)
+                col(ctx, shade(pc, 1.6))
+                for gx in range(1, 4):
+                    ctx.move_to(ax - 95 + gx * 47.5, py)
+                    ctx.line_to(ax - 95 + gx * 47.5, py + 560)
+                for gy in range(1, 10):
+                    ctx.move_to(ax - 95, py + gy * 56)
+                    ctx.line_to(ax + 95, py + gy * 56)
+                ctx.stroke()
+                fill_rrect(ctx, ax - 6, py, 12, 560, 3, "#c9a24a")
+    # truss with lattice
+    fill_rrect(ctx, -span, -24, 2 * span, 48, 6, "#9aa0aa")
+    ctx.set_line_width(4)
+    col(ctx, "#6f7682")
+    xx = -span
+    while xx < span:
+        ctx.move_to(xx, -24)
+        ctx.line_to(xx + 48, 24)
+        ctx.move_to(xx + 48, -24)
+        ctx.line_to(xx, 24)
+        xx += 48
+    ctx.stroke()
+    # radiators
+    for sgn in (-1, 1):
+        fill_rrect(ctx, sgn * 260 - 60, 30, 120, 300, 6, "#f2f2ee")
+        ctx.set_line_width(3)
+        col(ctx, "#cfd2d6")
+        for gy in range(1, 8):
+            ctx.move_to(sgn * 260 - 60, 30 + gy * 37)
+            ctx.line_to(sgn * 260 + 60, 30 + gy * 37)
+        ctx.stroke()
+    # pressurised modules
+    for (mx, my, mw, mh) in ((-170, -70, 340, 140), (-430, -55, 240, 110), (190, -55, 260, 110),
+                             (-70, -250, 140, 190)):
+        two_tone(ctx, lambda: rrect(ctx, mx, my, mw, mh, 40), mc, mx + mw * 0.62, 0.86)
+        ctx.set_line_width(4)
+        col(ctx, shade(mc, 0.8))
+        for k in range(1, 4):
+            if mw > mh:
+                ctx.move_to(mx + mw * k / 4, my + 6)
+                ctx.line_to(mx + mw * k / 4, my + mh - 6)
+            else:
+                ctx.move_to(mx + 6, my + mh * k / 4)
+                ctx.line_to(mx + mw - 6, my + mh * k / 4)
+        ctx.stroke()
+    fill_rrect(ctx, -60, -240, 120, 40, 10, "#c9a24a")
+    # airlock + window lights
+    fill_rrect(ctx, -60, 60, 120, 110, 30, shade(mc, 0.92))
+    circle(ctx, 0, 150, 40, "#2b3140")
+    circle(ctx, 0, 150, 28, "#5a6680")
+    for wx in (-120, -60, 60, 120):
+        circle(ctx, wx, -20, 9, "#ffe7a3")
+    ctx.restore()
+
+
+@part("tether")
+def tether(ctx, env, el):
+    """Safety tether from a fixed point to an actor's suit (follows the actor as it moves).
+    params: from [x,y], to_actor (actor id) or to [x,y], sag (default 60), color,
+    cut_at (seconds; the line snaps: the station end whips back, a short stub trails the actor)."""
+    ax, ay = el["from"]
+
+    def actor(tt=None):
+        who = el.get("to_actor")
+        try:
+            return env.actor_at(who, tt), env.cast[who].get("scale", 1.0)
+        except (StopIteration, AttributeError, KeyError):
+            return None, 1.0
+
+    def anchor(tt=None):
+        if el.get("to_actor"):
+            a, base = actor(tt)
+            s = a.get("scale", 1.0) * base
+            return a.get("x", 540) - 60 * s, a.get("y", 1500) - 330 * s
+        return tuple(el.get("to", (ax, ay + 300)))
+
+    if el.get("to_actor") and actor()[0] is None:
+        return  # actor not in this shot
+
+    t = env.t
+    c = g(el, "color", "#e6dfc8")
+    sag = g(el, "sag", 60)
+    ctx.set_line_cap(1)
+    ctx.set_line_width(g(el, "width", 7))
+
+    def curve(p0, p1, sg, wob_key):
+        mx, my = (p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2
+        dx, dy = p1[0] - p0[0], p1[1] - p0[1]
+        ln = math.hypot(dx, dy) or 1
+        nx, ny = -dy / ln, dx / ln
+        w = sg + 14 * noise1(t * 0.9, wob_key)
+        ctx.move_to(*p0)
+        ctx.curve_to(mx + nx * w * 0.5, my + ny * w * 0.5 + w * 0.5,
+                     mx + nx * w, my + ny * w + w * 0.3, p1[0], p1[1])
+        col(ctx, c)
+        ctx.stroke()
+
+    cut = el.get("cut_at")
+    if cut is None or t < cut:
+        curve((ax, ay), anchor(), sag, "teth")
+        return
+    dt = t - cut
+    bx, by = anchor(cut)
+    px, py = ax + (bx - ax) * 0.7, ay + (by - ay) * 0.7  # cut point
+    k = ease(dt / 1.4)
+    ex = px + (ax + (px - ax) * 0.25 - px) * k + 40 * math.sin(dt * 7) * (1 - k)
+    ey = py + (ay + (py - ay) * 0.25 - py) * k + 30 * math.cos(dt * 6) * (1 - k)
+    curve((ax, ay), (ex, ey), sag * (1 - k * 0.5), "teth_a")
+    cx, cy = anchor()
+    ang = math.atan2(py - by, px - bx) + math.sin(dt * 3) * 0.6
+    stub = 0.3 * math.hypot(px - bx, py - by)
+    if el.get("to_actor"):
+        stub *= actor()[0].get("scale", 1.0) / max(1e-3, actor(cut)[0].get("scale", 1.0))
+    curve((cx, cy), (cx + math.cos(ang) * stub, cy + math.sin(ang) * stub), 20, "teth_b")
+    if dt < 0.45:  # sparks at the cut
+        for i in range(14):
+            a = h01("spark", i) * 2 * math.pi
+            d = dt * (300 + 500 * h01("spd", i))
+            circle(ctx, px + math.cos(a) * d, py + math.sin(a) * d, 5 * (1 - dt / 0.45),
+                   "#ffd36b", 1 - dt / 0.45)

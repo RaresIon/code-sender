@@ -1,0 +1,147 @@
+{
+  "meta": {"title": "What if something was waiting outside the space station?", "fps": 30,
+           "series_tag": "WHAT IF"},
+
+  "cast": {
+    "mike": {"skin": "#e2ad8c", "hair": "short", "hair_color": "#5a3b28", "top": "spacesuit",
+             "accent": "#d9473b", "scale": 0.8},
+    "ana":  {"skin": "#b9825f", "hair": "bun", "hair_color": "#231713", "top": "spacesuit",
+             "accent": "#3b7bd9", "scale": 0.8}
+  },
+
+  "sets": {
+    "orbit": {"elements": [
+      {"kit": "space", "p": 0.08, "nebula": [{"x": 150, "y": 250, "r": 700, "color": "#3b2a6b", "alpha": 0.35},
+                                            {"x": 1000, "y": 1200, "r": 500, "color": "#1d4a6b", "alpha": 0.25}]},
+      {"kit": "planet", "x": 540, "y": 3150, "r": 1700, "p": 0.25, "night_side": "right"},
+      {"kit": "station", "x": 540, "y": 520, "scale": 0.75, "p": 0.9},
+      {"kit": "tether", "id": "t_mike", "from": [430, 545], "to_actor": "mike", "sag": 70},
+      {"kit": "tether", "id": "t_ana", "from": [690, 545], "to_actor": "ana", "sag": -50},
+      {"kit": "shapes", "id": "alien", "x": 0, "y": 0, "scale": 0.75, "alpha": 0, "shapes": [
+        {"type": "line", "points": [[0, 100], [-40, 220], [10, 330], [-30, 430]], "width": 20, "color": "#2b1e44"},
+        {"type": "line", "points": [[24, 100], [70, 230], [40, 340], [90, 440]], "width": 18, "color": "#2b1e44"},
+        {"type": "line", "points": [[-70, -60], [-170, 0], [-230, 90]], "width": 24, "color": "#35264f"},
+        {"type": "line", "points": [[70, -60], [170, -10], [250, 40]], "width": 24, "color": "#35264f"},
+        {"type": "poly", "points": [[250, 40], [305, 16], [262, 52]], "color": "#cfd6e6"},
+        {"type": "poly", "points": [[250, 40], [300, 66], [256, 60]], "color": "#cfd6e6"},
+        {"type": "poly", "points": [[-230, 90], [-280, 120], [-240, 100]], "color": "#cfd6e6"},
+        {"type": "ellipse", "x": 0, "y": 0, "rx": 85, "ry": 150, "color": "#3a2858"},
+        {"type": "ellipse", "x": 0, "y": 20, "rx": 40, "ry": 90, "color": "#6cf2c2", "alpha": 0.22},
+        {"type": "ellipse", "x": 0, "y": -200, "rx": 95, "ry": 80, "color": "#3a2858"},
+        {"type": "ellipse", "x": 0, "y": -245, "rx": 70, "ry": 45, "color": "#4a3570"},
+        {"type": "circle", "x": -38, "y": -205, "r": 34, "color": "#7dffb2", "alpha": 0.25},
+        {"type": "circle", "x": 38, "y": -205, "r": 34, "color": "#7dffb2", "alpha": 0.25},
+        {"type": "circle", "x": -38, "y": -205, "r": 15, "color": "#c9ffe2", "alpha": 1.0},
+        {"type": "circle", "x": 38, "y": -205, "r": 15, "color": "#c9ffe2", "alpha": 1.0},
+        {"type": "circle", "x": 0, "y": -250, "r": 10, "color": "#c9ffe2", "alpha": 1.0},
+        {"type": "line", "points": [[-30, -152], [-10, -146], [10, -146], [30, -152]], "width": 6, "color": "#150c22"}
+      ]}
+    ]},
+    "deep": {"elements": [
+      {"kit": "space", "p": 0.1, "stars": 420, "bottom": "#03050d",
+       "nebula": [{"x": 700, "y": 700, "r": 800, "color": "#2a1b4d", "alpha": 0.3}]},
+      {"kit": "shapes", "id": "speck", "x": 610, "y": 760, "alpha": 1, "flat_shade": false, "shapes": [
+        {"type": "circle", "x": 0, "y": 0, "r": 18, "color": "#7dffb2", "alpha": 0.25},
+        {"type": "circle", "x": 0, "y": 0, "r": 5, "color": "#e8fff2", "alpha": 1.0}]}
+    ]}
+  },
+
+  "shots": [
+    {"id": "orbit", "dur": 4.0, "set": "orbit",
+     "hud": {"day": 1, "time": "14:06", "place": "ISS · Spacewalk"},
+     "actors": [{"who": "mike", "x": 380, "y": 1350, "pose": "float", "float": true},
+                {"who": "ana", "x": 790, "y": 1260, "pose": "float", "float": true}],
+     "camera": {"shot": "wide", "move": "push_in", "amount": 0.06},
+     "captions": [{"text": "400 km above Earth.", "at": 0.2, "emph": ["Earth"]},
+                  {"text": "Spacewalk, hour three.", "at": 1.9, "emph": ["three"]}]},
+
+    {"id": "mike", "dur": 3.0, "set": "orbit",
+     "hud": {"day": 1, "time": "14:06", "place": "ISS · Spacewalk"},
+     "actors": [{"who": "mike", "x": 380, "y": 1350, "pose": "float", "float": true, "expr": "happy"}],
+     "camera": {"shot": "close", "target": "mike", "move": "push_in", "amount": 0.05},
+     "captions": [{"text": "Panel's fixed. Heading back in.", "speaker": "mike", "at": 0.2}]},
+
+    {"id": "ana_wait", "dur": 2.4, "set": "orbit",
+     "hud": {"day": 1, "time": "14:07", "place": "ISS · Spacewalk"},
+     "actors": [{"who": "ana", "x": 790, "y": 1260, "pose": "float", "float": true, "look": -1,
+                 "expr": [[0, "neutral"], [1.0, "surprised"]]}],
+     "camera": {"shot": "close", "target": "ana", "move": "push_in", "amount": 0.05},
+     "captions": [{"text": "Copy, Mike. Wait...", "speaker": "ana", "at": 0.2, "emph": ["Wait"]}]},
+
+    {"id": "something", "dur": 4.2, "set": "orbit",
+     "hud": {"day": 1, "time": "14:07", "place": "ISS · Spacewalk"},
+     "override": {"alien": {"x": [[0, -160], [4.2, 140]], "y": [[0, 880], [4.2, 1050]],
+                            "alpha": [[0, 0], [1.4, 1]], "rot": [[0, -12], [4.2, 4]]}},
+     "actors": [{"who": "mike", "x": 380, "y": 1350, "pose": "float", "float": true},
+                {"who": "ana", "x": 790, "y": 1260, "pose": "float", "float": true, "look": -1,
+                 "expr": "scared"}],
+     "camera": {"shot": "wide", "move": "push_in", "amount": 0.08},
+     "captions": [{"text": "Something is out there.", "at": 0.3, "emph": ["Something"]},
+                  {"text": "And it's coming closer.", "at": 2.2, "emph": ["closer"]}]},
+
+    {"id": "alien_close", "dur": 2.4, "set": "orbit",
+     "hud": {"day": 1, "time": "14:07", "place": "ISS · Spacewalk"},
+     "override": {"alien": {"x": 140, "y": [[0, 1050], [1.2, 1035], [2.4, 1050]], "alpha": 1}},
+     "camera": {"shot": "close", "target": [150, 910], "move": "push_in", "amount": 0.08},
+     "captions": [{"text": "It's not human.", "at": 0.3, "pos": "low", "emph": ["not"]}]},
+
+    {"id": "cut", "dur": 3.0, "set": "orbit", "flash": 1.0,
+     "hud": {"day": 1, "time": "14:08", "place": "ISS · Spacewalk"},
+     "override": {"alien": {"x": [[0, 80], [0.95, 160]], "y": [[0, 960], [0.95, 890]], "alpha": 1,
+                            "rot": [[0, -10], [0.95, 8], [1.6, -6]]},
+                  "t_mike": {"cut_at": 1.0}},
+     "actors": [{"who": "mike", "pose": "float", "float": true,
+                 "x": [[1.0, 380], [3.0, 440]], "y": [[1.0, 1350], [3.0, 1300]],
+                 "rot": [[1.0, 0], [3.0, 25]], "expr": [[0, "neutral"], [1.05, "scared"]]}],
+     "camera": {"shot": "wide", "zoom": 1.5, "target": [330, 1080],
+                "shake": [{"at": 1.0, "dur": 0.6, "amp": 22}]},
+     "captions": [{"text": "It cuts his tether.", "at": 1.1, "emph": ["tether"]}]},
+
+    {"id": "drifting", "dur": 2.4, "set": "orbit",
+     "hud": {"day": 1, "time": "14:08", "place": "ISS · Spacewalk"},
+     "override": {"t_mike": {"cut_at": -5}},
+     "actors": [{"who": "mike", "x": 440, "y": 1300, "pose": "float", "float": 1.6,
+                 "rot": [[0, 22], [2.4, 34]], "expr": "scared"}],
+     "camera": {"shot": "close", "target": "mike", "handheld": 2.5},
+     "captions": [{"text": "Ana! I'm drifting!", "speaker": "mike", "at": 0.2, "emph": ["drifting"]}]},
+
+    {"id": "taken", "dur": 4.2, "set": "orbit",
+     "hud": {"day": 1, "time": "14:08", "place": "ISS · Spacewalk"},
+     "override": {"t_mike": {"cut_at": -5},
+                  "alien": {"x": [[0, 260], [4.2, 816]], "y": [[0, 1080], [4.2, 332]],
+                            "scale": [[0, 0.75], [4.2, 0.06]], "rot": [[0, 0], [4.2, 160]],
+                            "alpha": [[3.4, 1], [4.2, 0]]}},
+     "actors": [{"who": "mike", "pose": "float", "expr": "scared",
+                 "x": [[0, 430], [4.2, 830]], "y": [[0, 1300], [4.2, 350]],
+                 "scale": [[0, 1], [4.2, 0.08]], "rot": [[0, 25], [4.2, 200]],
+                 "alpha": [[3.4, 1], [4.2, 0]]},
+                {"who": "ana", "x": 800, "y": 1290, "pose": "reach", "float": true, "expr": "scared",
+                 "look": -1}],
+     "camera": {"shot": "wide", "move": "push_in", "amount": 0.05},
+     "captions": [{"text": "And drags him into the dark.", "at": 0.4, "emph": ["dark"]}]},
+
+    {"id": "ana_calls", "dur": 2.8, "set": "orbit",
+     "hud": {"day": 1, "time": "14:09", "place": "ISS · Spacewalk"},
+     "actors": [{"who": "ana", "x": 800, "y": 1290, "pose": "reach", "float": true, "expr": "scared"}],
+     "camera": {"shot": "close", "target": "ana", "move": "push_in", "amount": 0.06},
+     "captions": [{"text": "Mike?! MIKE!", "speaker": "ana", "at": 0.2, "emph": ["MIKE"]},
+                  {"text": "No answer.", "at": 1.6, "emph": ["No"]}]},
+
+    {"id": "void", "dur": 3.0, "set": "deep",
+     "hud": {"day": 1, "time": "14:09", "place": "Deep space"},
+     "override": {"speck": {"alpha": [[0, 1], [2.6, 0]], "scale": [[0, 1], [2.6, 0.4]]}},
+     "camera": {"shot": "wide", "move": "push_in", "amount": 0.15},
+     "captions": [{"text": "Then... nothing.", "at": 0.5, "pos": "low", "emph": ["nothing"]}]},
+
+    {"id": "choice", "dur": 4.0, "type": "choice",
+     "choice": {"questions": [{"text": "Do you go after him?", "at": 0.1},
+                              {"text": "Or get back inside?", "at": 1.1, "color": "#6fb6ff"},
+                              {"text": "38 minutes of oxygen left.", "at": 1.9, "color": "#9aa3b5"}],
+                "options": [{"label": "Go after him", "icon": "rocket", "color": "#ff9f43", "at": 0.35},
+                            {"label": "Back to the airlock", "icon": "airlock", "color": "#6fb6ff", "at": 1.3}],
+                "footer": {"text": "Tell me in the comments ↓", "at": 2.4}}},
+
+    {"id": "end", "dur": 2.5, "type": "end",
+     "end": {"kicker": "Lost in orbit", "title": "DAY 2", "sub": "Follow now for part 2"}}
+  ]
+}
